@@ -1,6 +1,6 @@
 import Header from "../components/Header";
 import CreatePost from "../components/CreatePost";
-
+import PostList from "../components/postList";
 const Home = () => {
   return (
     <>
@@ -11,7 +11,7 @@ const Home = () => {
         <div className="max-w-2xl mx-auto">
 
           <CreatePost />
-
+          <PostList />
         </div>
 
       </main>
