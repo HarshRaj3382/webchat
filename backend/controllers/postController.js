@@ -1,9 +1,11 @@
 import Post from "../models/Post.js";
 
+// Create Post
 export const createPost = async (req, res) => {
   try {
     const { content } = req.body;
 
+    // Validation
     if (!content) {
       return res.status(400).json({
         success: false,
@@ -17,17 +19,19 @@ export const createPost = async (req, res) => {
       content,
     });
 
-    // Fetch again with user details
+    // Populate User Details
     const post = await Post.findById(createdPost._id).populate(
       "user",
       "username profilePic"
     );
 
+    // Response
     res.status(201).json({
       success: true,
       message: "Post Created Successfully",
       post,
     });
+
   } catch (error) {
     console.log(error);
 
@@ -38,7 +42,8 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const getAllPosts = async (req, res) => {
+// Get All Posts
+export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .populate("user", "username profilePic")
@@ -48,7 +53,10 @@ export const getAllPosts = async (req, res) => {
       success: true,
       posts,
     });
+
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -57,16 +65,52 @@ export const getAllPosts = async (req, res) => {
 };
 
 
-export const getPosts = async (req, res) => {
+// Like / Unlike Post
+export const likePost = async (req, res) => {
   try {
-    const posts = await Post.find()
-      .populate("user", "username profilePic")
-      .sort({ createdAt: -1 });
+    // Post ID
+    const postId = req.params.id;
 
-    res.json({
+    // Logged In User ID
+    const userId = req.user._id;
+
+    // Find Post
+    const post = await Post.findById(postId);
+
+    // Check Post
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // Already Liked?
+    const alreadyLiked = post.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // Unlike
+      post.likes.pull(userId);
+    } else {
+      // Like
+      post.likes.push(userId);
+    }
+
+    // Save Changes
+    await post.save();
+
+    // Populate User
+    await post.populate("user", "username profilePic");
+
+    // Response
+    res.status(200).json({
       success: true,
-      posts,
+      message: alreadyLiked
+        ? "Post Unliked"
+        : "Post Liked",
+      post,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
