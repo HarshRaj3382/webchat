@@ -1,7 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -12,10 +16,11 @@ connectDB();
 
 const app = express();
 
-// CORS
+// CORS Configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    // If FRONTEND_URL is not set in Render environment, it will fallback to localhost to prevent CORS crashes
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -27,9 +32,28 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 
-app.get("/", (req, res) => {
-  res.send("🚀 WebChat Backend Running");
+// Health check endpoint (Useful for Render health checks)
+app.get("/health", (req, res) => {
+  res.status(200).send("Backend is healthy");
 });
+
+if (process.env.NODE_ENV === "production") {
+  const frontendPath = path.join(__dirname, "../frontend/dist");
+  app.use(express.static(frontendPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(frontendPath, "index.html"), (err) => {
+      if (err) {
+        // Prevent Express from crashing if the frontend dist is missing (e.g. separate frontend/backend deployments)
+        res.status(404).send("API is running, but frontend build is not found.");
+      }
+    });
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("🚀 WebChat Backend Running");
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 
