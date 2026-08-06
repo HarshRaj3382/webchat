@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "/api",
+  baseURL: import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "https://webchat-backend-ht0g.onrender.com/api",
 });
 
 // Automatically attach JWT Token
