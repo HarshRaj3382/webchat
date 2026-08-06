@@ -1,6 +1,6 @@
 import Header from "../components/Header";
 import CreatePost from "../components/CreatePost";
-import PostList from "../components/postList";
+import PostList from "../components/PostList";
 const Home = () => {
   return (
     <>
