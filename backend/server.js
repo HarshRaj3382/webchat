@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
 
-  app.get("*", (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(frontendPath, "index.html"), (err) => {
       if (err) {
         // Prevent Express from crashing if the frontend dist is missing (e.g. separate frontend/backend deployments)
