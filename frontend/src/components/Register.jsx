@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../api/authApi";
 import {
   User,
@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState("");
@@ -50,41 +52,36 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // Register API
-    const res = await API.post("/auth/register", formData);
+    try {
+      const res = await API.post("/auth/register", formData);
 
-    console.log(res.data);
+      alert(res.data.message || "Registration Successful");
 
-    alert(res.data.message);
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        profilePic: "",
+      });
 
-    // Form Reset
-    setFormData({
-      username: "",
-      email: "",
-      password: "",
-      profilePic: "",
-    });
+      setPreview("");
 
-    setPreview("");
+      navigate("/login", { replace: true });
 
-    // Redirect
-    navigate("/login");
+    } catch (err) {
+      console.log(err);
 
-  } catch (err) {
-    console.log(err);
-
-    alert(
-      err.response?.data?.message || "Something went wrong"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      alert(
+        err.response?.data?.message || "Registration Failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
@@ -109,7 +106,7 @@ const Register = () => {
                 {preview ? (
                   <img
                     src={preview}
-                    alt=""
+                    alt="Preview"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -195,14 +192,18 @@ const Register = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-3"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? (
+                <EyeOff size={20} />
+              ) : (
+                <Eye size={20} />
+              )}
             </button>
 
           </div>
 
           <button
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex justify-center items-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex justify-center items-center gap-2 disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -217,7 +218,6 @@ const Register = () => {
         </form>
 
         <p className="text-center mt-6 text-gray-600">
-
           Already have an account?
 
           <Link
