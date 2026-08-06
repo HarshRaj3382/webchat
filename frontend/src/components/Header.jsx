@@ -8,37 +8,37 @@ const Header = () => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     navigate("/login");
   };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
 
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg">
             💬
           </div>
 
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
             WebChat
           </h1>
         </Link>
 
+        {/* User Logged In */}
         {user ? (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
 
-            <div className="text-right">
-
-              <h3 className="font-semibold">
+            {/* Hide username on very small screens */}
+            <div className="hidden sm:block text-right">
+              <h3 className="font-semibold text-sm md:text-base">
                 {user.username}
               </h3>
 
-              <p className="text-sm text-green-600">
-                Online
+              <p className="text-xs text-green-600">
+                ● Online
               </p>
-
             </div>
 
             <img
@@ -47,29 +47,29 @@ const Header = () => {
                   ? user.profilePic
                   : "https://i.pravatar.cc/150"
               }
-              alt=""
-              className="w-11 h-11 rounded-full border object-cover"
+              alt="Profile"
+              className="w-10 h-10 rounded-full border object-cover"
             />
 
             <button
               onClick={logout}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg text-sm transition"
             >
               Logout
             </button>
 
           </div>
         ) : (
-          <div className="flex gap-3">
+          <div className="flex items-center gap-2">
 
             <Link to="/login">
-              <button className="border border-blue-600 px-5 py-2 rounded-lg text-blue-600">
+              <button className="border border-blue-600 text-blue-600 px-3 sm:px-5 py-2 rounded-lg text-sm hover:bg-blue-50 transition">
                 Login
               </button>
             </Link>
 
             <Link to="/register">
-              <button className="bg-blue-600 text-white px-5 py-2 rounded-lg">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-5 py-2 rounded-lg text-sm transition">
                 Register
               </button>
             </Link>
