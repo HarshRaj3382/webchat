@@ -59,7 +59,7 @@ const Register = () => {
     try {
       const res = await API.post("/auth/register", formData);
 
-      alert(res.data.message || "Registration Successful");
+      // alert(res.data.message || "Registration Successful");
 
       setFormData({
         username: "",
