@@ -29,17 +29,22 @@ const Login = () => {
     try {
       const res = await API.post("/auth/login", formData);
 
-      console.log(res.data);
-
       // Save Token
       localStorage.setItem("token", res.data.token);
 
       // Save User
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      alert(res.data.message);
+      // alert(res.data.message || "Login Successful");
 
-      navigate("/");
+      // Redirect to Home
+      navigate("/", { replace: true });
+
+      // Refresh so Header updates immediately
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+
     } catch (err) {
       console.log(err);
 
@@ -51,7 +56,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center px-4">
-
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 
         <h1 className="text-3xl font-bold text-center text-blue-600">
@@ -65,7 +69,6 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-5 mt-8">
 
           <div className="relative">
-
             <Mail
               className="absolute left-3 top-3 text-gray-400"
               size={20}
@@ -80,11 +83,9 @@ const Login = () => {
               onChange={handleChange}
               className="w-full border rounded-lg py-3 pl-10 outline-blue-500"
             />
-
           </div>
 
           <div className="relative">
-
             <Lock
               className="absolute left-3 top-3 text-gray-400"
               size={20}
@@ -111,12 +112,11 @@ const Login = () => {
                 <Eye size={20} />
               )}
             </button>
-
           </div>
 
           <button
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex justify-center items-center gap-2 transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex justify-center items-center gap-2 transition disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -139,11 +139,9 @@ const Login = () => {
           >
             Register
           </Link>
-
         </p>
 
       </div>
-
     </div>
   );
 };
