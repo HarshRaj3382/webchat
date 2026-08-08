@@ -1,37 +1,38 @@
 import { useEffect, useState } from "react";
-import API from "../api/authApi";
+import PostApi from "../api/postApi";
 import PostCard from "./PostCard";
 import demoPosts from "../data/posts";
 
 const DEFAULT_PROFILE =
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVVGo-nXbvk4li-Z3T2a0jKO5xsnhXx7JJ8FYoQEUhyND2QeSlHd3Yhtw&s";
 
-const PostList = () => {
+const PostList = ({ refreshKey }) => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [refreshKey]);
 
   const fetchPosts = async () => {
     try {
-      const res = await API.get("/posts");
+      const res = await PostApi.fetchPosts();
 
       const backendPosts = res.data.posts.map((post) => ({
-        _id: post._id,
-        username: post.user?.username || "Anonymous",
-        profilePic: post.user?.profilePic || DEFAULT_PROFILE,
-        content: post.content,
-        createdAt: post.createdAt,
+        ...post,
+        user: post.user || { username: "Anonymous", profilePic: DEFAULT_PROFILE },
         likes: post.likes || [],
+        comments: post.comments || [],
       }));
 
       setPosts([...backendPosts, ...demoPosts]);
-
     } catch (error) {
       console.log(error);
       setPosts(demoPosts);
     }
+  };
+
+  const handleCommentAdded = () => {
+    fetchPosts();
   };
 
   return (
@@ -40,6 +41,7 @@ const PostList = () => {
         <PostCard
           key={post._id || post.id || index}
           post={post}
+          onCommentAdded={handleCommentAdded}
         />
       ))}
     </div>

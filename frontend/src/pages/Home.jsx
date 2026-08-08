@@ -1,7 +1,14 @@
+import { useState } from "react";
 import Header from "../components/Header";
 import CreatePost from "../components/CreatePost";
 import PostList from "../components/PostList";
 const Home = () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handlePostCreated = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <>
       <Header />
@@ -10,8 +17,8 @@ const Home = () => {
 
         <div className="max-w-2xl mx-auto">
 
-          <CreatePost />
-          <PostList />
+          <CreatePost onPostCreated={handlePostCreated} />
+          <PostList refreshKey={refreshKey} />
         </div>
 
       </main>
