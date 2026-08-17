@@ -2,61 +2,74 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import { createServer } from "http";
 import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { Server } from "socket.io";
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import callRoutes from "./routes/callRoutes.js";
+import { initializeSocket } from "./socket/socketServer.js";
 
 dotenv.config();
 
-connectDB();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+
+await connectDB();
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: frontendOrigin, credentials: true },
+});
+app.set("io", io);
 
-// CORS Configuration
-app.use(
-  cors({
-    // If FRONTEND_URL is not set in Render environment, it will fallback to localhost to prevent CORS crashes
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors({ origin: frontendOrigin, credentials: true }));
+app.use(express.json({ limit: "10mb" }));
 
-// VERY IMPORTANT
-app.use(express.json());
-
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/calls", callRoutes);
 
-// Health check endpoint (Useful for Render health checks)
 app.get("/health", (req, res) => {
-  res.status(200).send("Backend is healthy");
+  res.status(200).json({
+    status: "healthy",
+    features: {
+      messaging: true,
+      livekitCalls: Boolean(
+        process.env.LIVEKIT_URL &&
+        process.env.LIVEKIT_API_KEY &&
+        process.env.LIVEKIT_API_SECRET
+      ),
+    },
+  });
 });
+
+initializeSocket(io);
 
 if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
-
   app.get(/.*/, (req, res) => {
-    res.sendFile(path.resolve(frontendPath, "index.html"), (err) => {
-      if (err) {
-        // Prevent Express from crashing if the frontend dist is missing (e.g. separate frontend/backend deployments)
-        res.status(404).send("API is running, but frontend build is not found.");
-      }
+    res.sendFile(path.resolve(frontendPath, "index.html"), (error) => {
+      if (error) res.status(404).send("API is running, but the frontend build was not found.");
     });
   });
 } else {
   app.get("/", (req, res) => {
-    res.send("🚀 WebChat Backend Running");
+    res.send("WebChat backend is running");
   });
 }
 
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`WebChat server running on http://localhost:${PORT}`);
 });

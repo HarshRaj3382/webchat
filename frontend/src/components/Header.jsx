@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   ChevronDown,
@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   MessageCircle,
+  MessagesSquare,
   Search,
   X,
 } from "lucide-react";
@@ -22,6 +23,7 @@ const getStoredUser = () => {
 
 const Header = ({ onSearch }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const user = getStoredUser();
 
@@ -46,9 +48,15 @@ const Header = ({ onSearch }) => {
         <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-xl bg-indigo-50 px-3.5 py-2 text-sm font-semibold text-indigo-700"
+            className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition ${location.pathname === "/" ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}
           >
             <Home size={17} /> Home
+          </Link>
+          <Link
+            to="/messages"
+            className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition ${location.pathname === "/messages" ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}
+          >
+            <MessagesSquare size={17} /> Messages
           </Link>
           <a
             href="#discover"
@@ -58,7 +66,7 @@ const Header = ({ onSearch }) => {
           </a>
         </nav>
 
-        <label className="relative mx-auto hidden w-full max-w-md md:block">
+        {onSearch ? <label className="relative mx-auto hidden w-full max-w-md md:block">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="search"
@@ -67,7 +75,7 @@ const Header = ({ onSearch }) => {
             onChange={(event) => onSearch?.(event.target.value)}
             className="w-full rounded-2xl border border-slate-200 bg-slate-50/80 py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-4 focus:ring-indigo-100"
           />
-        </label>
+        </label> : <div className="flex-1" />}
 
         {user ? (
           <div className="ml-auto flex items-center gap-2">
@@ -114,6 +122,9 @@ const Header = ({ onSearch }) => {
                 <a href="#discover" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 lg:hidden">
                   <Compass size={17} /> Discover
                 </a>
+                <Link to="/messages" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 lg:hidden">
+                  <MessagesSquare size={17} /> Messages
+                </Link>
                 <button
                   type="button"
                   onClick={logout}

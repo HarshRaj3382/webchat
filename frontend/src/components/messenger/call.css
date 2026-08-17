@@ -1,0 +1,34 @@
+/* LiveKit's prefab needs an explicit height chain when it is rendered in a fixed overlay. */
+.call-room .lk-room-container,
+.call-room [data-lk-theme],
+.call-room .lk-video-conference,
+.call-room .lk-video-conference-inner,
+.call-room .lk-audio-conference {
+  min-height: 0;
+  height: 100%;
+}
+
+.call-room .lk-video-conference-inner,
+.call-room .lk-audio-conference {
+  flex: 1 1 auto;
+}
+
+.call-room .lk-grid-layout-wrapper,
+.call-room .lk-focus-layout-wrapper,
+.call-room .lk-audio-conference-stage {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.call-room .lk-grid-layout,
+.call-room .lk-focus-layout {
+  min-height: 0;
+  height: 100%;
+}
+
+.call-room .lk-control-bar,
+.call-room .lk-agent-control-bar {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
