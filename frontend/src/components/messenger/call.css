@@ -32,3 +32,66 @@
   z-index: 2;
   flex-shrink: 0;
 }
+
+/* The stock LiveKit chat is a side panel on desktop and a drawer on mobile. */
+.call-room .lk-chat {
+  z-index: 30;
+}
+
+.call-room .lk-chat .lk-close-button {
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  color: #fff;
+}
+
+.call-room .lk-chat .lk-close-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 640px) {
+  .call-room .lk-chat {
+    inset: 0 0 var(--control-bar-height) 0;
+    width: 100vw;
+    max-width: none;
+    border-left: 0;
+    border-bottom: 1px solid var(--lk-border-color, rgba(255, 255, 255, 0.14));
+  }
+
+  .call-room .lk-chat-header {
+    justify-content: flex-start;
+    padding-inline: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .call-room .lk-chat .lk-close-button {
+    right: 0.25rem;
+    transform: none;
+  }
+
+  .call-room .lk-chat-form {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .call-room .lk-control-bar {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .call-room .lk-control-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .call-room .lk-control-bar .lk-button {
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

@@ -33,6 +33,7 @@ const Avatar = ({ user, large = false }) => (
 const ActiveCall = ({ call, partner, session, onEnd, onHeartbeat }) => {
   const [mediaError, setMediaError] = useState("");
   const isVideo = call.type === "video";
+  const supportsScreenSharing = typeof navigator !== "undefined" && Boolean(navigator.mediaDevices?.getDisplayMedia);
 
   useEffect(() => {
     onHeartbeat?.();
@@ -70,6 +71,14 @@ const ActiveCall = ({ call, partner, session, onEnd, onHeartbeat }) => {
           <PhoneOff size={19} />
         </button>
       </div>
+
+      {isVideo && !supportsScreenSharing && (
+        <div className="pointer-events-none absolute inset-x-4 top-20 z-10 text-center sm:inset-x-auto sm:left-1/2 sm:top-6 sm:-translate-x-1/2">
+          <span className="inline-flex rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-[11px] font-medium text-slate-300 shadow-lg backdrop-blur-md">
+            Screen sharing is not supported by this mobile browser.
+          </span>
+        </div>
+      )}
 
       {mediaError && (
         <div className="absolute inset-0 z-20 grid place-items-center bg-slate-950/80 p-5 backdrop-blur-md">
