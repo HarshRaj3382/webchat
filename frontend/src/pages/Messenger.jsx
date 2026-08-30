@@ -41,10 +41,22 @@ const formatTime = (value) => {
 
 const getRequestErrorMessage = (requestError, fallback) => {
   if (requestError.response?.data?.message) return requestError.response.data.message;
-  if (requestError.code === "ERR_NETWORK" || requestError.message === "Network Error") {
-    return "The server could not be reached. Check that the backend is running on port 5000.";
+  if (["ERR_NETWORK", "ECONNABORTED"].includes(requestError.code) || requestError.message === "Network Error") {
+    return "Could not reach the WebChat server. It may be waking up—please try again in a few seconds.";
   }
   return fallback;
+};
+
+const retryAfterServerWake = async (request) => {
+  try {
+    return await request();
+  } catch (error) {
+    const isNetworkError = ["ERR_NETWORK", "ECONNABORTED"].includes(error.code) || error.message === "Network Error";
+    if (!isNetworkError) throw error;
+
+    await new Promise((resolve) => window.setTimeout(resolve, 2_000));
+    return request();
+  }
 };
 
 const Messenger = () => {
@@ -94,7 +106,7 @@ const Messenger = () => {
   const joinLiveKitCall = useCallback(async (call) => {
     setCallState({ call, phase: "connecting" });
     try {
-      const response = await MessageApi.getCallToken(call._id);
+      const response = await retryAfterServerWake(() => MessageApi.getCallToken(call._id));
       setCallState({ call, phase: "active", session: response.data });
     } catch (requestError) {
       setCallState({
@@ -272,7 +284,7 @@ const Messenger = () => {
     if (!callState?.call || acceptingCall) return;
     setAcceptingCall(true);
     try {
-      const response = await MessageApi.respondToCall(callState.call._id, true);
+      const response = await retryAfterServerWake(() => MessageApi.respondToCall(callState.call._id, true));
       joinLiveKitCall(response.data.call);
     } catch (requestError) {
       setCallState((current) => ({

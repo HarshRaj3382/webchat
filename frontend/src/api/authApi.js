@@ -9,6 +9,8 @@ const baseURL =
 
 const API = axios.create({
   baseURL,
+  // Render free services can take up to about a minute to wake after idle time.
+  timeout: 65_000,
 });
 
 // Automatically attach JWT Token
