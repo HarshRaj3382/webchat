@@ -33,6 +33,12 @@ const Header = ({ onSearch }) => {
     navigate("/login");
   };
 
+  const enableNotifications = async () => {
+    if ("Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
@@ -81,7 +87,9 @@ const Header = ({ onSearch }) => {
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
+              onClick={enableNotifications}
               aria-label="Notifications"
+              title="Enable browser notifications for incoming calls"
               className="relative hidden size-10 place-items-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:grid"
             >
               <Bell size={19} />

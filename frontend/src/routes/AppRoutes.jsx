@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import Register from "../components/Register";
 import Login from "../components/Login";
 import ProtectedRoute from "../components/ProtectedRoute";
+import GlobalIncomingCallListener from "../components/GlobalIncomingCallListener";
 
 const Messenger = lazy(() => import("../pages/Messenger"));
 
@@ -24,7 +25,9 @@ const MessengerPage = () => (
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <>
+      <GlobalIncomingCallListener />
+      <Routes>
 
       <Route
         path="/"
@@ -48,7 +51,8 @@ const AppRoutes = () => {
         }
       />
 
-    </Routes>
+      </Routes>
+    </>
   );
 };
 
