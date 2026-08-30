@@ -16,6 +16,7 @@ import {
 import Header from "../components/Header";
 import MessageApi from "../api/messageApi";
 import { createMessengerSocket } from "../lib/socket";
+import { redirectToLogin } from "../lib/session";
 
 const CallOverlay = lazy(() => import("../components/messenger/CallOverlay"));
 
@@ -109,6 +110,12 @@ const Messenger = () => {
 
     const onConnect = () => setConnected(true);
     const onDisconnect = () => setConnected(false);
+    const onConnectError = (connectionError) => {
+      setConnected(false);
+      if (["Authentication required", "Invalid or expired session", "User not found"].includes(connectionError.message)) {
+        redirectToLogin();
+      }
+    };
     const onPresenceSnapshot = (userIds) => setOnlineUsers(new Set(userIds.map(String)));
     const onPresenceUpdate = ({ userId, online }) => {
       setOnlineUsers((current) => {
@@ -150,6 +157,7 @@ const Messenger = () => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", onConnectError);
     socket.on("presence:snapshot", onPresenceSnapshot);
     socket.on("presence:update", onPresenceUpdate);
     socket.on("message:new", onMessage);

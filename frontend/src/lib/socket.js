@@ -11,6 +11,8 @@ const socketUrl = import.meta.env.VITE_SOCKET_URL || apiUrl.replace(/\/api\/?$/,
 export const createMessengerSocket = () =>
   io(socketUrl, {
     autoConnect: false,
-    auth: { token: localStorage.getItem("token") },
-    transports: ["websocket", "polling"],
+    // Read the token when a connection is made so a new login is used instead
+    // of an outdated value captured when this module was created.
+    auth: (callback) => callback({ token: localStorage.getItem("token") }),
+    transports: ["polling", "websocket"],
   });

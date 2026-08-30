@@ -1,4 +1,5 @@
 import axios from "axios";
+import { redirectToLogin } from "../lib/session";
 
 const baseURL =
   import.meta.env.VITE_API_URL ||
@@ -20,5 +21,18 @@ API.interceptors.request.use((config) => {
 
   return config;
 });
+
+// A token can expire or become invalid after the backend secret changes. Do not
+// leave the app on protected pages repeatedly making unauthorized requests.
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      redirectToLogin();
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default API;
