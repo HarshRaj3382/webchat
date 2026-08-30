@@ -313,6 +313,10 @@ const Messenger = () => {
     setCallState(null);
   };
 
+  const heartbeatCall = useCallback((callId) => {
+    MessageApi.heartbeatCall(callId).catch(() => {});
+  }, []);
+
   const partner = getPartner(selectedConversation, currentUser?._id);
 
   return (
@@ -406,7 +410,7 @@ const Messenger = () => {
       {error && <button type="button" onClick={() => setError("")} className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-xl">{error}</button>}
       {callState && (
         <Suspense fallback={<div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950"><Loader2 className="animate-spin text-white" /></div>}>
-          <CallOverlay callState={callState} currentUserId={currentUser?._id} accepting={acceptingCall} onAccept={acceptCall} onReject={rejectCall} onEnd={endCall} />
+          <CallOverlay callState={callState} currentUserId={currentUser?._id} accepting={acceptingCall} onAccept={acceptCall} onReject={rejectCall} onEnd={endCall} onHeartbeat={heartbeatCall} />
         </Suspense>
       )}
     </div>

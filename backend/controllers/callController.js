@@ -5,6 +5,8 @@ import Call from "../models/Call.js";
 import Conversation from "../models/Conversation.js";
 
 const userRoom = (userId) => `user:${userId}`;
+const STALE_RINGING_AFTER_MS = 60_000;
+const STALE_ACCEPTED_AFTER_MS = 3 * 60_000;
 
 const populateCall = (query) =>
   query.populate("caller receiver", "username email profilePic");
@@ -45,14 +47,24 @@ export const startCall = async (req, res) => {
       (participantId) => String(participantId) !== String(req.user._id)
     );
 
-    const staleRingingBefore = new Date(Date.now() - 60_000);
+    const now = new Date();
+    const staleRingingBefore = new Date(now.getTime() - STALE_RINGING_AFTER_MS);
+    const staleAcceptedBefore = new Date(now.getTime() - STALE_ACCEPTED_AFTER_MS);
     await Call.updateMany(
       {
         conversation: conversation._id,
-        status: "ringing",
-        createdAt: { $lt: staleRingingBefore },
+        $or: [
+          { status: "ringing", createdAt: { $lt: staleRingingBefore } },
+          {
+            status: "accepted",
+            $or: [
+              { lastActiveAt: { $lt: staleAcceptedBefore } },
+              { lastActiveAt: { $exists: false }, startedAt: { $lt: staleAcceptedBefore } },
+            ],
+          },
+        ],
       },
-      { $set: { status: "missed", endedAt: new Date() } }
+      { $set: { status: "ended", endedAt: now } }
     );
 
     const existingCall = await Call.findOne({
@@ -126,7 +138,10 @@ export const respondToCall = async (req, res) => {
     }
 
     call.status = accepted ? "accepted" : "rejected";
-    if (accepted) call.startedAt = new Date();
+    if (accepted) {
+      call.startedAt = new Date();
+      call.lastActiveAt = new Date();
+    }
     else call.endedAt = new Date();
     await call.save();
 
@@ -137,6 +152,24 @@ export const respondToCall = async (req, res) => {
       .emit(eventName, populatedCall);
 
     return res.json({ success: true, call: populatedCall });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const heartbeatCall = async (req, res) => {
+  try {
+    const call = await Call.findById(req.params.callId);
+    if (!isCallParticipant(call, req.user._id)) {
+      return res.status(403).json({ success: false, message: "Call access denied" });
+    }
+    if (call.status !== "accepted") {
+      return res.status(409).json({ success: false, message: "The call is no longer active" });
+    }
+
+    call.lastActiveAt = new Date();
+    await call.save();
+    return res.json({ success: true });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

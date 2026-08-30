@@ -33,6 +33,7 @@ const callSchema = new mongoose.Schema(
       default: "ringing",
     },
     startedAt: Date,
+    lastActiveAt: Date,
     endedAt: Date,
   },
   { timestamps: true }

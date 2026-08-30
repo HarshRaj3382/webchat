@@ -12,6 +12,7 @@ const MessageApi = {
   startCall: (conversationId, type) => API.post("calls", { conversationId, type }),
   respondToCall: (callId, accepted) => API.patch(`calls/${callId}/respond`, { accepted }),
   endCall: (callId) => API.patch(`calls/${callId}/end`),
+  heartbeatCall: (callId) => API.patch(`calls/${callId}/heartbeat`),
   getCallToken: (callId) => API.post(`calls/${callId}/token`),
 };
 

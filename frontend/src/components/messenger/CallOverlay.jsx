@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AudioConference,
   LiveKitRoom,
@@ -30,9 +30,15 @@ const Avatar = ({ user, large = false }) => (
   </div>
 );
 
-const ActiveCall = ({ call, partner, session, onEnd }) => {
+const ActiveCall = ({ call, partner, session, onEnd, onHeartbeat }) => {
   const [mediaError, setMediaError] = useState("");
   const isVideo = call.type === "video";
+
+  useEffect(() => {
+    onHeartbeat?.();
+    const interval = window.setInterval(() => onHeartbeat?.(), 25_000);
+    return () => window.clearInterval(interval);
+  }, [onHeartbeat]);
 
   return (
     <div className="call-room relative h-full min-h-full w-full overflow-hidden bg-slate-950">
@@ -79,7 +85,7 @@ const ActiveCall = ({ call, partner, session, onEnd }) => {
   );
 };
 
-const CallOverlay = ({ callState, currentUserId, accepting, onAccept, onReject, onEnd }) => {
+const CallOverlay = ({ callState, currentUserId, accepting, onAccept, onReject, onEnd, onHeartbeat }) => {
   if (!callState) return null;
 
   const { call, phase, session, error } = callState;
@@ -88,7 +94,7 @@ const CallOverlay = ({ callState, currentUserId, accepting, onAccept, onReject, 
   if (phase === "active" && session) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-950">
-        <ActiveCall call={call} partner={partner} session={session} onEnd={onEnd} />
+        <ActiveCall call={call} partner={partner} session={session} onEnd={onEnd} onHeartbeat={() => onHeartbeat?.(call._id)} />
       </div>
     );
   }

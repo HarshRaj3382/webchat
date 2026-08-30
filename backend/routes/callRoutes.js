@@ -3,6 +3,7 @@ import {
   createLiveKitToken,
   endCall,
   getCallConfiguration,
+  heartbeatCall,
   respondToCall,
   startCall,
 } from "../controllers/callController.js";
@@ -15,6 +16,7 @@ router.get("/config", getCallConfiguration);
 router.post("/", startCall);
 router.patch("/:callId/respond", respondToCall);
 router.patch("/:callId/end", endCall);
+router.patch("/:callId/heartbeat", heartbeatCall);
 router.post("/:callId/token", createLiveKitToken);
 
 export default router;

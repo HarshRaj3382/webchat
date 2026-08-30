@@ -118,6 +118,10 @@ const GlobalIncomingCallListener = () => {
     setCallState(null);
   };
 
+  const heartbeatCall = useCallback((callId) => {
+    MessageApi.heartbeatCall(callId).catch(() => {});
+  }, []);
+
   if (!callState) return null;
 
   return (
@@ -129,6 +133,7 @@ const GlobalIncomingCallListener = () => {
         onAccept={acceptCall}
         onReject={rejectCall}
         onEnd={endCall}
+        onHeartbeat={heartbeatCall}
       />
     </Suspense>
   );
